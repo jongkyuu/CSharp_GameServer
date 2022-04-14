@@ -3,11 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31229.75
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server", "Server\Server.csproj", "{A7898750-5347-4A32-A977-B0F20D706DE5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Server", "Server\Server.csproj", "{A7898750-5347-4A32-A977-B0F20D706DE5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerCore", "ServerCore\ServerCore.csproj", "{F0CA6699-D693-4703-A988-2C63A4518447}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServerCore", "ServerCore\ServerCore.csproj", "{F0CA6699-D693-4703-A988-2C63A4518447}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DummyClient", "DummyClient\DummyClient.csproj", "{2D081E05-5398-45A9-B4FF-BD204A8631CA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DummyClient", "DummyClient\DummyClient.csproj", "{2D081E05-5398-45A9-B4FF-BD204A8631CA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MemoryBarrierDemo", "MemoryBarrierDemo\MemoryBarrierDemo.csproj", "{1082177F-3E81-4C06-A2F1-152338F726CE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{2D081E05-5398-45A9-B4FF-BD204A8631CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2D081E05-5398-45A9-B4FF-BD204A8631CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2D081E05-5398-45A9-B4FF-BD204A8631CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1082177F-3E81-4C06-A2F1-152338F726CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1082177F-3E81-4C06-A2F1-152338F726CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1082177F-3E81-4C06-A2F1-152338F726CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1082177F-3E81-4C06-A2F1-152338F726CE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
