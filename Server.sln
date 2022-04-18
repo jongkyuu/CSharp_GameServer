@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DummyClient", "DummyClient\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MemoryBarrierDemo", "MemoryBarrierDemo\MemoryBarrierDemo.csproj", "{1082177F-3E81-4C06-A2F1-152338F726CE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InterlockedDemo", "InterlockedDemo\InterlockedDemo.csproj", "{36F79074-7EEE-44B5-ACE1-4A0BD0F927B1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InterlockedDemo", "InterlockedDemo\InterlockedDemo.csproj", "{36F79074-7EEE-44B5-ACE1-4A0BD0F927B1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LockDemo", "LockDemo\LockDemo.csproj", "{94502DAD-9E0A-4967-BD57-9827071E0487}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{36F79074-7EEE-44B5-ACE1-4A0BD0F927B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{36F79074-7EEE-44B5-ACE1-4A0BD0F927B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{36F79074-7EEE-44B5-ACE1-4A0BD0F927B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94502DAD-9E0A-4967-BD57-9827071E0487}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94502DAD-9E0A-4967-BD57-9827071E0487}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94502DAD-9E0A-4967-BD57-9827071E0487}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94502DAD-9E0A-4967-BD57-9827071E0487}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
