@@ -17,10 +17,10 @@ namespace DummyClient
             IPAddress ipAddress = ipHost.AddressList[0];
             IPEndPoint endPoint = new IPEndPoint(ipAddress, 7777);
 
-            
 
-            //while (true)
-            //{
+
+            while (true)
+            {
                 // 휴대폰 설정
                 Socket socket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
@@ -30,9 +30,13 @@ namespace DummyClient
                     socket.Connect(endPoint);  // Blocking 함수
                     Console.WriteLine($"Connect To {socket.RemoteEndPoint.ToString()}");
 
-                    // 보낸다
-                    byte[] sendBuff = Encoding.UTF8.GetBytes("Hello World");
-                    int sendBytes = socket.Send(sendBuff); // Blocking 함수
+                    for(int i=0; i < 5; i++)
+                    {
+                        // 보낸다
+                        byte[] sendBuff = Encoding.UTF8.GetBytes($"Hello World {i}");
+                        int sendBytes = socket.Send(sendBuff); // Blocking 함수
+                    }
+
 
                     // 받는다
                     byte[] recvBuff = new byte[1024];
@@ -50,8 +54,8 @@ namespace DummyClient
                     Console.WriteLine(ex.ToString());
                 }
 
-            //    Thread.Sleep(1000);
-            //}
+                Thread.Sleep(1000);
+            }
 
         }
     }
