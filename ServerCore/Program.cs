@@ -25,6 +25,7 @@ namespace ServerCore
                 Thread.Sleep(1000);
 
                 session.Disconnect();
+                //session.Disconnect();
 
                 //// 받는다
                 //byte[] recvBuff = new byte[1024];

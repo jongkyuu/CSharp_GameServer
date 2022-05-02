@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ServerCore
@@ -10,6 +11,7 @@ namespace ServerCore
     class Session
     {
         Socket _socket;
+        int _disconnected = 0;
 
         public void Start(Socket socket)
         {
@@ -25,11 +27,14 @@ namespace ServerCore
 
         public void Send(byte[] sendBuff)
         {
+            // 아직 Blocking 함수 사용
             _socket.Send(sendBuff);
         }
 
         public void Disconnect()
         {
+            if (Interlocked.Exchange(ref _disconnected, 1) == 1) // 이전 값이 1이면 return
+                return;
             _socket.Shutdown(SocketShutdown.Both);
             _socket.Close();
         }
