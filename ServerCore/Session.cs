@@ -13,14 +13,17 @@ namespace ServerCore
         Socket _socket;
         int _disconnected = 0;
 
+        SocketAsyncEventArgs _sendArgs = new SocketAsyncEventArgs();
+
         public void Start(Socket socket)
         {
             _socket = socket;
             // recive를 비동기 방식으로 변경
             SocketAsyncEventArgs recvArgs = new SocketAsyncEventArgs();
             recvArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnRecvCompleted);  // _socket.ReceiveAsync가 나중에 성공하면 이벤트를 통해 콜백으로 실행됨
+            recvArgs.SetBuffer(new byte[1024], 0, 1024);
 
-            recvArgs.SetBuffer(new byte[10224], 0, 1024);
+            _sendArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnSendCompleted);  // _socket.ReceiveAsync가 나중에 성공하면 이벤트를 통해 콜백으로 실행됨
 
             RegisterRecv(recvArgs);
         }
@@ -28,7 +31,10 @@ namespace ServerCore
         public void Send(byte[] sendBuff)
         {
             // 아직 Blocking 함수 사용
-            _socket.Send(sendBuff);
+            //_socket.Send(sendBuff);
+
+            _sendArgs.SetBuffer(sendBuff, 0, sendBuff.Length);
+            RegisterSend();
         }
 
         public void Disconnect()
@@ -37,6 +43,32 @@ namespace ServerCore
                 return;
             _socket.Shutdown(SocketShutdown.Both);
             _socket.Close();
+        }
+
+        void RegisterSend()
+        {
+            bool pending = _socket.SendAsync(_sendArgs);  // 운영체제가 커널단에서 처리하기 때문에 아무렇게나 호출하면 안됨
+            if (pending == false)
+                OnSendCompleted(null, _sendArgs);
+        }
+
+        private void OnSendCompleted(object sender, SocketAsyncEventArgs args)
+        {
+            if(args.BytesTransferred > 0 && args.SocketError == SocketError.Success)
+            {
+                try
+                {
+
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"OnSendCompleted Failed {e}");
+                }
+            }
+            else
+            {
+                Disconnect();
+            }
         }
 
         #region 네트워크 통신
@@ -70,6 +102,7 @@ namespace ServerCore
             else
             {
                 // TODO Disconnect
+                Disconnect();
             }
         }
 
