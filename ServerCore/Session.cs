@@ -13,6 +13,10 @@ namespace ServerCore
         Socket _socket;
         int _disconnected = 0;
 
+        object _lock = new object();
+        Queue<byte[]> _sendQueue = new Queue<byte[]>();
+        bool _pending = false;
+        // send 할때마다 매번 _sendArgs를 생성하는게 아니라 재사용
         SocketAsyncEventArgs _sendArgs = new SocketAsyncEventArgs();
 
         public void Start(Socket socket)
@@ -28,13 +32,17 @@ namespace ServerCore
             RegisterRecv(recvArgs);
         }
 
+        // 멀티스레딩 환경에서 Send를 호출하면 _sendArgs 동일한 이벤트를 사용하는게 문제가 됨. 
+        // 기존에 넣어준게 완료되지 않은 상태에서 버퍼가 다른 데이터로 변경되면 에러 발생
         public void Send(byte[] sendBuff)
         {
-            // 아직 Blocking 함수 사용
-            //_socket.Send(sendBuff);
-
-            _sendArgs.SetBuffer(sendBuff, 0, sendBuff.Length);
-            RegisterSend();
+            lock(_lock)
+            {
+                _sendQueue.Enqueue(sendBuff);
+                if (_pending == false)
+                    RegisterSend();
+            }
+            //_sendArgs.SetBuffer(sendBuff, 0, sendBuff.Length);
         }
 
         public void Disconnect()
@@ -47,6 +55,10 @@ namespace ServerCore
 
         void RegisterSend()
         {
+            _pending = true;
+            byte[] buff = _sendQueue.Dequeue();
+            _sendArgs.SetBuffer(buff, 0, buff.Length);
+
             bool pending = _socket.SendAsync(_sendArgs);  // 운영체제가 커널단에서 처리하기 때문에 아무렇게나 호출하면 안됨
             if (pending == false)
                 OnSendCompleted(null, _sendArgs);
@@ -54,20 +66,26 @@ namespace ServerCore
 
         private void OnSendCompleted(object sender, SocketAsyncEventArgs args)
         {
-            if(args.BytesTransferred > 0 && args.SocketError == SocketError.Success)
+            lock (_lock)
             {
-                try
+                if (args.BytesTransferred > 0 && args.SocketError == SocketError.Success)
                 {
-
+                    try
+                    {
+                        if (_sendQueue.Count > 0)
+                            RegisterSend();
+                        else
+                            _pending = false;
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine($"OnSendCompleted Failed {e}");
+                    }
                 }
-                catch (Exception e)
+                else
                 {
-                    Console.WriteLine($"OnSendCompleted Failed {e}");
+                    Disconnect();
                 }
-            }
-            else
-            {
-                Disconnect();
             }
         }
 
