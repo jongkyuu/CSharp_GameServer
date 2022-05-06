@@ -15,21 +15,22 @@ namespace ServerCore
 
         object _lock = new object();
         Queue<byte[]> _sendQueue = new Queue<byte[]>();
-        bool _pending = false;
         // send 할때마다 매번 _sendArgs를 생성하는게 아니라 재사용
         SocketAsyncEventArgs _sendArgs = new SocketAsyncEventArgs();
+        SocketAsyncEventArgs _recvArgs = new SocketAsyncEventArgs();
+
+        List<ArraySegment<byte>> _pendingList = new List<ArraySegment<byte>>();
 
         public void Start(Socket socket)
         {
             _socket = socket;
-            // recive를 비동기 방식으로 변경
-            SocketAsyncEventArgs recvArgs = new SocketAsyncEventArgs();
-            recvArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnRecvCompleted);  // _socket.ReceiveAsync가 나중에 성공하면 이벤트를 통해 콜백으로 실행됨
-            recvArgs.SetBuffer(new byte[1024], 0, 1024);
+            
+            _recvArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnRecvCompleted);  // _socket.ReceiveAsync가 나중에 성공하면 이벤트를 통해 콜백으로 실행됨
+            _recvArgs.SetBuffer(new byte[1024], 0, 1024);
 
             _sendArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnSendCompleted);  // _socket.ReceiveAsync가 나중에 성공하면 이벤트를 통해 콜백으로 실행됨
 
-            RegisterRecv(recvArgs);
+            RegisterRecv();
         }
 
         // 멀티스레딩 환경에서 Send를 호출하면 _sendArgs 동일한 이벤트를 사용하는게 문제가 됨. 
@@ -39,7 +40,7 @@ namespace ServerCore
             lock(_lock)
             {
                 _sendQueue.Enqueue(sendBuff);
-                if (_pending == false)
+                if (_pendingList.Count == 0)
                     RegisterSend();
             }
             //_sendArgs.SetBuffer(sendBuff, 0, sendBuff.Length);
@@ -55,9 +56,16 @@ namespace ServerCore
 
         void RegisterSend()
         {
-            _pending = true;
-            byte[] buff = _sendQueue.Dequeue();
-            _sendArgs.SetBuffer(buff, 0, buff.Length);
+            // 아래 코드는 _sendQueue에 있는 내용을 한꺼번에 보내고 비움 
+            // 짧은 시간동안 몇 byte를 보냈는지 추적해서 너무 많이 보낸다면 좀 쉬면서 보내줘야할 필요가 있다
+            // 동시에 패킷이 몰릴때 상대가 받을 수 없는데 계속 보내는건 문제가 있음 
+            while (_sendQueue.Count > 0)
+            {
+                byte[] buff = _sendQueue.Dequeue();
+                _pendingList.Add(new ArraySegment<byte>(buff, 0, buff.Length));
+            }
+
+            _sendArgs.BufferList = _pendingList;
 
             bool pending = _socket.SendAsync(_sendArgs);  // 운영체제가 커널단에서 처리하기 때문에 아무렇게나 호출하면 안됨
             if (pending == false)
@@ -72,10 +80,14 @@ namespace ServerCore
                 {
                     try
                     {
+                        _sendArgs.BufferList = null; // 굳이 해줄필요는 없음 
+                        _pendingList.Clear();
+                        
+                        Console.WriteLine($"Transferred Bytes : {_sendArgs.BytesTransferred}");
                         if (_sendQueue.Count > 0)
                             RegisterSend();
-                        else
-                            _pending = false;
+                        //else
+                        //    _pending = false;
                     }
                     catch (Exception e)
                     {
@@ -90,11 +102,11 @@ namespace ServerCore
         }
 
         #region 네트워크 통신
-        void RegisterRecv(SocketAsyncEventArgs args)
+        void RegisterRecv()
         {
-            bool pending = _socket.ReceiveAsync(args);
+            bool pending = _socket.ReceiveAsync(_recvArgs);
             if (pending == false)  // 운 좋게 바로 데이터를 리턴받는 경우
-                OnRecvCompleted(null, args);
+                OnRecvCompleted(null, _recvArgs);
         }
 
         void OnRecvCompleted(object sender, SocketAsyncEventArgs args)
@@ -108,7 +120,7 @@ namespace ServerCore
                     string recvData = Encoding.UTF8.GetString(args.Buffer, args.Offset, args.BytesTransferred);  // args.BytesTransferred : 몇 byte를 받았는지
                     Console.WriteLine($"[From Client] : {recvData}");
 
-                    RegisterRecv(args);
+                    RegisterRecv();
                 }
 
                 catch (Exception e)
