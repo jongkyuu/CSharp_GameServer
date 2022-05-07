@@ -43,7 +43,10 @@ namespace ServerCore
             if (args.SocketError == SocketError.Success)  // 에러없이 잘 처리된 경우
             {
                 // TODO
-                _onAcceptHandler.Invoke(args.AcceptSocket);  // args.AcceptSocket : 연결된 Client의 소켓이 만들어짐. 재사용할때 다시 AcceptSocket을 초기화해줘야함(아니면 Error)
+                GameSession session = new GameSession();
+                session.Start(args.AcceptSocket);
+                session.OnConnected(args.AcceptSocket.RemoteEndPoint);
+                //_onAcceptHandler.Invoke(args.AcceptSocket);  // args.AcceptSocket : 연결된 Client의 소켓이 만들어짐. 재사용할때 다시 AcceptSocket을 초기화해줘야함(아니면 Error)
             }
             else
             {

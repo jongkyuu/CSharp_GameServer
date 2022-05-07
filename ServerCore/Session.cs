@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -8,18 +9,23 @@ using System.Threading.Tasks;
 
 namespace ServerCore
 {
-    class Session
+    abstract class Session
     {
         Socket _socket;
         int _disconnected = 0;
 
         object _lock = new object();
         Queue<byte[]> _sendQueue = new Queue<byte[]>();
+        List<ArraySegment<byte>> _pendingList = new List<ArraySegment<byte>>();
+
         // send 할때마다 매번 _sendArgs를 생성하는게 아니라 재사용
         SocketAsyncEventArgs _sendArgs = new SocketAsyncEventArgs();
         SocketAsyncEventArgs _recvArgs = new SocketAsyncEventArgs();
 
-        List<ArraySegment<byte>> _pendingList = new List<ArraySegment<byte>>();
+        public abstract void OnConnected(EndPoint endPoint);
+        public abstract void OnRecv(ArraySegment<byte> buffer);
+        public abstract void OnSend(int numOfBytes);
+        public abstract void OnDisconnected(EndPoint endPoint);
 
         public void Start(Socket socket)
         {
@@ -50,6 +56,8 @@ namespace ServerCore
         {
             if (Interlocked.Exchange(ref _disconnected, 1) == 1) // 이전 값이 1이면 return
                 return;
+
+            OnDisconnected(_socket.RemoteEndPoint);
             _socket.Shutdown(SocketShutdown.Both);
             _socket.Close();
         }
@@ -82,8 +90,9 @@ namespace ServerCore
                     {
                         _sendArgs.BufferList = null; // 굳이 해줄필요는 없음 
                         _pendingList.Clear();
+
+                        OnSend(_sendArgs.BytesTransferred);
                         
-                        Console.WriteLine($"Transferred Bytes : {_sendArgs.BytesTransferred}");
                         if (_sendQueue.Count > 0)
                             RegisterSend();
                         //else
@@ -114,11 +123,14 @@ namespace ServerCore
             // 경우에 따라 0 byte가 올수도 있음(상대가 연결을 끊는다거나 할때) 
             if(args.BytesTransferred > 0 && args.SocketError == SocketError.Success)
             {
+                // TODO, 나중에는 간단하게 string만 받아오지 않고 복잡하게 바꿀 예정
                 try
                 {
-                    // TODO, 나중에는 간단하게 string만 받아오지 않고 복잡하게 바꿀 예정
-                    string recvData = Encoding.UTF8.GetString(args.Buffer, args.Offset, args.BytesTransferred);  // args.BytesTransferred : 몇 byte를 받았는지
-                    Console.WriteLine($"[From Client] : {recvData}");
+                    OnRecv(new ArraySegment<byte>(args.Buffer, args.Offset, args.BytesTransferred));
+
+                    // 아래 부분은 Server Contents 쪽으로 옮기고 Server Core에서는 OnRecv만 호출한다
+                    //string recvData = Encoding.UTF8.GetString(args.Buffer, args.Offset, args.BytesTransferred);  // args.BytesTransferred : 몇 byte를 받았는지
+                    //Console.WriteLine($"[From Client] : {recvData}");
 
                     RegisterRecv();
                 }
