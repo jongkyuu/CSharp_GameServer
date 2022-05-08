@@ -30,9 +30,9 @@ namespace DummyClient
                     socket.Connect(endPoint);  // Blocking 함수
                     Console.WriteLine($"Connect To {socket.RemoteEndPoint.ToString()}");
 
-                    for(int i=0; i < 5; i++)
+                    // 보낸다
+                    for (int i=0; i < 5; i++)
                     {
-                        // 보낸다
                         byte[] sendBuff = Encoding.UTF8.GetBytes($"Hello World {i}");
                         int sendBytes = socket.Send(sendBuff); // Blocking 함수
                     }

@@ -11,11 +11,12 @@ namespace ServerCore
     class Listener
     {
         Socket _listenSocket;
-        Action<Socket> _onAcceptHandler;
+        //Action<Socket> _onAcceptHandler;
+        Func<Session> _sessionFactory;
 
-        public void Init(IPEndPoint endPoint, Action<Socket> onAcceptHandler)
+        public void Init(IPEndPoint endPoint, Func<Session> sessionFactory)
         {
-            _onAcceptHandler += onAcceptHandler;
+            _sessionFactory += sessionFactory;
             _listenSocket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             // 문지기 교육
             _listenSocket.Bind(endPoint);
@@ -43,7 +44,7 @@ namespace ServerCore
             if (args.SocketError == SocketError.Success)  // 에러없이 잘 처리된 경우
             {
                 // TODO
-                GameSession session = new GameSession();
+                Session session = _sessionFactory.Invoke();
                 session.Start(args.AcceptSocket);
                 session.OnConnected(args.AcceptSocket.RemoteEndPoint);
                 //_onAcceptHandler.Invoke(args.AcceptSocket);  // args.AcceptSocket : 연결된 Client의 소켓이 만들어짐. 재사용할때 다시 AcceptSocket을 초기화해줘야함(아니면 Error)

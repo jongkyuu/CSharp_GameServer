@@ -14,6 +14,13 @@ namespace ServerCore
         public override void OnConnected(EndPoint endPoint)
         {
             Console.WriteLine($"OnConnected : {endPoint}");
+
+            byte[] sendBuff = Encoding.UTF8.GetBytes("Welcome to MMORPG Server");
+            Send(sendBuff);
+
+            Thread.Sleep(1000);
+
+            Disconnect();
         }
 
         public override void OnDisconnected(EndPoint endPoint)
@@ -37,41 +44,41 @@ namespace ServerCore
     {
         static Listener _listener = new Listener();
 
-        static void OnAcceptHandler(Socket clientSocket)
-        {
-            try
-            {
-                GameSession session = new GameSession();
-                session.Start(clientSocket);
+        //static void OnAcceptHandler(Socket clientSocket)
+        //{
+        //    try
+        //    {
+        //        GameSession session = new GameSession();
+        //        session.Start(clientSocket);
 
-                byte[] sendBuff = Encoding.UTF8.GetBytes("Welcome to MMORPG Server");
-                session.Send(sendBuff);
+        //        byte[] sendBuff = Encoding.UTF8.GetBytes("Welcome to MMORPG Server");
+        //        session.Send(sendBuff);
 
-                Thread.Sleep(1000);
+        //        Thread.Sleep(1000);
 
-                session.Disconnect();
-                //session.Disconnect();
+        //        session.Disconnect();
+        //        //session.Disconnect();
 
-                //// 받는다
-                //byte[] recvBuff = new byte[1024];
-                //int recvBytes = clientSocket.Receive(recvBuff);
-                //string recvData = Encoding.UTF8.GetString(recvBuff, 0, recvBytes).Trim();
-                //Console.WriteLine($"[From Client] : {recvData}");
+        //        //// 받는다
+        //        //byte[] recvBuff = new byte[1024];
+        //        //int recvBytes = clientSocket.Receive(recvBuff);
+        //        //string recvData = Encoding.UTF8.GetString(recvBuff, 0, recvBytes).Trim();
+        //        //Console.WriteLine($"[From Client] : {recvData}");
 
-                //// 보낸다
-                //byte[] sendBuff = Encoding.UTF8.GetBytes("Welcome to MMORPG Server");
-                //clientSocket.Send(sendBuff);
+        //        //// 보낸다
+        //        //byte[] sendBuff = Encoding.UTF8.GetBytes("Welcome to MMORPG Server");
+        //        //clientSocket.Send(sendBuff);
 
-                //// 쫒아낸다
-                //clientSocket.Shutdown(SocketShutdown.Both);
-                //clientSocket.Close();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
+        //        //// 쫒아낸다
+        //        //clientSocket.Shutdown(SocketShutdown.Both);
+        //        //clientSocket.Close();
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Console.WriteLine(e);
+        //    }
 
-        }
+        //}
 
         static void Main(string[] args)
         {
@@ -85,7 +92,7 @@ namespace ServerCore
             IPEndPoint endPoint = new IPEndPoint(ipAddress, 7777);
 
             // 문지기(가 들고있는 휴대폰) 생성
-            _listener.Init(endPoint, OnAcceptHandler);
+            _listener.Init(endPoint, () => { return new GameSession(); });
             Console.WriteLine("Listening...");
 
             while (true)
