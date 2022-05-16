@@ -28,13 +28,17 @@ namespace Server
             Console.WriteLine($"OnDisconnected : {endPoint}");
         }
 
-        public override void OnRecv(ArraySegment<byte> buffer)
+        public override int OnRecv(ArraySegment<byte> buffer)
         {
             string recvData = Encoding.UTF8.GetString(buffer.Array, buffer.Offset, buffer.Count);  // args.BytesTransferred : 몇 byte를 받았는지
             Console.WriteLine($"[From Client] : {recvData}");
+            return buffer.Count;
 
         }
 
+        // 이후에는 문자열이 아니라 약속된 프로토콜 대로 데이터를 주고 받는다
+        // 이동 패킷 (3,2) 좌표로 이동하고 싶다!
+        // 15 3 2
         public override void OnSend(int numOfBytes)
         {
             Console.WriteLine($"Transferred Bytes : {numOfBytes}");

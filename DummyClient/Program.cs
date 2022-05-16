@@ -26,12 +26,12 @@ namespace DummyClient
         {
             Console.WriteLine($"OnDisconnected : {endPoint}");
         }
-
-        public override void OnRecv(ArraySegment<byte> buffer)
+ 
+        public override int OnRecv(ArraySegment<byte> buffer)
         {
             string recvData = Encoding.UTF8.GetString(buffer.Array, buffer.Offset, buffer.Count);  // args.BytesTransferred : 몇 byte를 받았는지
             Console.WriteLine($"[From Server] : {recvData}");
-
+            return buffer.Count;
         }
 
         public override void OnSend(int numOfBytes)

@@ -14,6 +14,8 @@ namespace ServerCore
         Socket _socket;
         int _disconnected = 0;
 
+        RecvBuffer _recvBuffer = new RecvBuffer(1024);
+
         object _lock = new object();
         Queue<byte[]> _sendQueue = new Queue<byte[]>();
         List<ArraySegment<byte>> _pendingList = new List<ArraySegment<byte>>();
@@ -23,7 +25,7 @@ namespace ServerCore
         SocketAsyncEventArgs _recvArgs = new SocketAsyncEventArgs();
 
         public abstract void OnConnected(EndPoint endPoint);
-        public abstract void OnRecv(ArraySegment<byte> buffer);
+        public abstract int OnRecv(ArraySegment<byte> buffer);
         public abstract void OnSend(int numOfBytes);
         public abstract void OnDisconnected(EndPoint endPoint);
 
@@ -32,7 +34,7 @@ namespace ServerCore
             _socket = socket;
             
             _recvArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnRecvCompleted);  // _socket.ReceiveAsync가 나중에 성공하면 이벤트를 통해 콜백으로 실행됨
-            _recvArgs.SetBuffer(new byte[1024], 0, 1024);
+            //_recvArgs.SetBuffer(new byte[1024], 0, 1024);
 
             _sendArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnSendCompleted);  // _socket.ReceiveAsync가 나중에 성공하면 이벤트를 통해 콜백으로 실행됨
 
@@ -49,7 +51,6 @@ namespace ServerCore
                 if (_pendingList.Count == 0)
                     RegisterSend();
             }
-            //_sendArgs.SetBuffer(sendBuff, 0, sendBuff.Length);
         }
 
         public void Disconnect()
@@ -113,6 +114,10 @@ namespace ServerCore
         #region 네트워크 통신
         void RegisterRecv()
         {
+            _recvBuffer.Clean();
+            ArraySegment<byte> segment = _recvBuffer.WriteSegment;
+            _recvArgs.SetBuffer(segment.Array, segment.Offset, segment.Count);
+
             bool pending = _socket.ReceiveAsync(_recvArgs);
             if (pending == false)  // 운 좋게 바로 데이터를 리턴받는 경우
                 OnRecvCompleted(null, _recvArgs);
@@ -126,12 +131,28 @@ namespace ServerCore
                 // TODO, 나중에는 간단하게 string만 받아오지 않고 복잡하게 바꿀 예정
                 try
                 {
-                    OnRecv(new ArraySegment<byte>(args.Buffer, args.Offset, args.BytesTransferred));
+                    // Write커서 이동
+                    if(_recvBuffer.OnWrite(args.BytesTransferred) == false)
+                    {
+                        Disconnect();
+                        return;
+                    }
 
-                    // 아래 부분은 Server Contents 쪽으로 옮기고 Server Core에서는 OnRecv만 호출한다
-                    //string recvData = Encoding.UTF8.GetString(args.Buffer, args.Offset, args.BytesTransferred);  // args.BytesTransferred : 몇 byte를 받았는지
-                    //Console.WriteLine($"[From Client] : {recvData}");
+                    // 컨텐츠쪽으로 데이터를 넘겨주고 얼마나 처리했는지 받는다 
+                    //OnRecv(new ArraySegment<byte>(args.Buffer, args.Offset, args.BytesTransferred));
+                    int processLen = OnRecv(_recvBuffer.ReadSegment);
+                    if (processLen < 0 || _recvBuffer.DataSize < processLen)
+                    {
+                        Disconnect();
+                        return;
+                    }
 
+                    // Read 커서 이동
+                    if(_recvBuffer.OnRead(processLen) == false)
+                    {
+                        Disconnect();
+                        return;
+                    }
                     RegisterRecv();
                 }
 
