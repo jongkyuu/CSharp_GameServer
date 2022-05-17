@@ -5,15 +5,35 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using ServerCore;
+using System.Collections.Generic;
 
 namespace Server
 {
+    class Knight
+    {
+        public int hp;
+        public int attack;
+        public string name;
+        public List<int> skills = new List<int>();
+    }
+
     // ServerEngine과 Server Contents의 분리
     class GameSession : Session
     {
         public override void OnConnected(EndPoint endPoint)
         {
             Console.WriteLine($"OnConnected : {endPoint}");
+
+            // 보내는 순간에 외부에서 bytes를 만들어 줬다
+            // 지금은 간단하게 문자열을 byte 배열로 만들었는데
+            // 실제 게임에서는 패킷이라는 정보를 만들어서 보냄
+
+            Knight knight = new Knight() { hp = 100, attack = 10 };
+            byte[] sendBuffer = new byte[1024];
+            byte[] buffer = BitConverter.GetBytes(knight.hp);
+            byte[] buffer2 = BitConverter.GetBytes(knight.attack);
+            Array.Copy(buffer, 0, sendBuffer, 0, buffer.Length);
+            Array.Copy(buffer2, 0, sendBuffer, buffer.Length, buffer2.Length);
 
             byte[] sendBuff = Encoding.UTF8.GetBytes("Welcome to MMORPG Server");
             Send(sendBuff);

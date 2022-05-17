@@ -17,10 +17,10 @@ namespace ServerCore
             _buffer = new ArraySegment<byte>(new byte[bufferSize], 0, bufferSize);
         }
 
-        public int DataSize { get { return _writePos - _readPos; } }
-        public int FreeSize { get { return _buffer.Count - _writePos; } } // 버퍼에 남은 공간 
+        public int DataSize { get { return _writePos - _readPos; } }  // 처리되지 않은 데이터의 사이즈
+        public int FreeSize { get { return _buffer.Count - _writePos; } } // 버퍼에 남은 공간, _buffer.Count : 버퍼의 총 크기
 
-        public ArraySegment<byte> ReadSegment
+        public ArraySegment<byte> ReadSegment  // 데이터의 유효 범위가 어디부터 어디까지인지
         {
             get => new ArraySegment<byte>(_buffer.Array, _buffer.Offset + _readPos, DataSize);
         }
