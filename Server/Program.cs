@@ -13,8 +13,8 @@ namespace Server
     {
         public int hp;
         public int attack;
-        public string name;
-        public List<int> skills = new List<int>();
+        public string name;  // string은 가변적
+        public List<int> skills = new List<int>(); // skill List는 가변적
     }
 
     // ServerEngine과 Server Contents의 분리
@@ -29,13 +29,23 @@ namespace Server
             // 실제 게임에서는 패킷이라는 정보를 만들어서 보냄
 
             Knight knight = new Knight() { hp = 100, attack = 10 };
-            byte[] sendBuffer = new byte[1024];
+
+            //byte[] sendBuffer = new byte[1024];
+            //byte[] buffer = BitConverter.GetBytes(knight.hp);
+            //byte[] buffer2 = BitConverter.GetBytes(knight.attack);
+            //Array.Copy(buffer, 0, sendBuffer, 0, buffer.Length);
+            //Array.Copy(buffer2, 0, sendBuffer, buffer.Length, buffer2.Length);
+
+            ArraySegment<byte> openSegment = SendBufferHelper.Open(4096);
             byte[] buffer = BitConverter.GetBytes(knight.hp);
             byte[] buffer2 = BitConverter.GetBytes(knight.attack);
-            Array.Copy(buffer, 0, sendBuffer, 0, buffer.Length);
-            Array.Copy(buffer2, 0, sendBuffer, buffer.Length, buffer2.Length);
+            Array.Copy(buffer, 0, openSegment.Array, openSegment.Offset, buffer.Length);
+            Array.Copy(buffer2, 0, openSegment.Array, openSegment.Offset + buffer.Length, buffer2.Length);
+            ArraySegment<byte> sendBuff = SendBufferHelper.Close(buffer.Length + buffer2.Length);
 
-            byte[] sendBuff = Encoding.UTF8.GetBytes("Welcome to MMORPG Server");
+            // 100명의 유저가 움직인다면 Send를 하는 횟수가 빈번해짐
+            // sendBuff는 세션 내부보다는 외부에서 만들어서 보내주는게 효율적이다
+            //byte[] sendBuff = Encoding.UTF8.GetBytes("Welcome to MMORPG Server");
             Send(sendBuff);
 
             Thread.Sleep(1000);

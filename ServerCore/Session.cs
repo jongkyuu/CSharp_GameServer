@@ -17,7 +17,7 @@ namespace ServerCore
         RecvBuffer _recvBuffer = new RecvBuffer(1024);
 
         object _lock = new object();
-        Queue<byte[]> _sendQueue = new Queue<byte[]>();
+        Queue<ArraySegment<byte>> _sendQueue = new Queue<ArraySegment<byte>>();
         List<ArraySegment<byte>> _pendingList = new List<ArraySegment<byte>>();
 
         // send 할때마다 매번 _sendArgs를 생성하는게 아니라 재사용
@@ -41,7 +41,7 @@ namespace ServerCore
 
         // 멀티스레딩 환경에서 Send를 호출하면 _sendArgs 동일한 이벤트를 사용하는게 문제가 됨. 
         // 기존에 넣어준게 완료되지 않은 상태에서 버퍼가 다른 데이터로 변경되면 에러 발생
-        public void Send(byte[] sendBuff)
+        public void Send(ArraySegment<byte> sendBuff)
         {
             lock(_lock)
             {
@@ -66,10 +66,13 @@ namespace ServerCore
             // 아래 코드는 _sendQueue에 있는 내용을 한꺼번에 보내고 비움 
             // 짧은 시간동안 몇 byte를 보냈는지 추적해서 너무 많이 보낸다면 좀 쉬면서 보내줘야할 필요가 있다
             // 동시에 패킷이 몰릴때 상대가 받을 수 없는데 계속 보내는건 문제가 있음 
+
+            // MultiThread를 고려해서 생각해야한다
             while (_sendQueue.Count > 0)
             {
-                byte[] buff = _sendQueue.Dequeue();
-                _pendingList.Add(new ArraySegment<byte>(buff, 0, buff.Length));
+                ArraySegment<byte> buff = _sendQueue.Dequeue();
+                _pendingList.Add(buff);
+                //_pendingList.Add(new ArraySegment<byte>(buff, 0, buff.Length));
             }
 
             _sendArgs.BufferList = _pendingList;
