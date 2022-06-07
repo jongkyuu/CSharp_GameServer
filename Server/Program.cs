@@ -9,12 +9,21 @@ using System.Collections.Generic;
 
 namespace Server
 {
-    class Knight
+    class Packet
     {
-        public int hp;
-        public int attack;
-        public string name;  // string은 가변적
-        public List<int> skills = new List<int>(); // skill List는 가변적
+        public ushort size;  // ushort는 2byte
+        public ushort packetId;
+        // int로 할때보다 4byte를 아낄 수 있는데 
+        // 패킷을 만명의 user에게 보낸다고 하면 4만 byte를 아낄 수 있다 (나비효과)
+        // 패킷을 설계할 때는 최대한 압축을 해서 보내는게 중요하다
+    }
+
+    // 패킷 사이즈가 유동적으로 변할 수 있음 
+    class LoginOkPacket : Packet
+    {
+        // 캐릭터의 모든 정보를 List로 보낸다고 하면 
+        // LoginOkPacket의 사이즈를 쉽게 알 수 없다
+        // 그래서 첫 인자로 size를 넘겨줌
     }
 
     // ServerEngine과 Server Contents의 분리
@@ -28,7 +37,8 @@ namespace Server
             // 지금은 간단하게 문자열을 byte 배열로 만들었는데
             // 실제 게임에서는 패킷이라는 정보를 만들어서 보냄
 
-            Knight knight = new Knight() { hp = 100, attack = 10 };
+            // TCP는 패킷이 잘려서 올 수 있다
+            Packet packet = new Packet() { size = 100, packetId = 10 };
 
             //byte[] sendBuffer = new byte[1024];
             //byte[] buffer = BitConverter.GetBytes(knight.hp);
@@ -37,8 +47,8 @@ namespace Server
             //Array.Copy(buffer2, 0, sendBuffer, buffer.Length, buffer2.Length);
 
             ArraySegment<byte> openSegment = SendBufferHelper.Open(4096);
-            byte[] buffer = BitConverter.GetBytes(knight.hp);
-            byte[] buffer2 = BitConverter.GetBytes(knight.attack);
+            byte[] buffer = BitConverter.GetBytes(packet.size);
+            byte[] buffer2 = BitConverter.GetBytes(packet.packetId);
             Array.Copy(buffer, 0, openSegment.Array, openSegment.Offset, buffer.Length);
             Array.Copy(buffer2, 0, openSegment.Array, openSegment.Offset + buffer.Length, buffer2.Length);
             ArraySegment<byte> sendBuff = SendBufferHelper.Close(buffer.Length + buffer2.Length);
