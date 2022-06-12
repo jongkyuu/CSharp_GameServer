@@ -27,7 +27,7 @@ namespace Server
     }
 
     // ServerEngine과 Server Contents의 분리
-    class GameSession : Session
+    class GameSession : PacketSession
     {
         public override void OnConnected(EndPoint endPoint)
         {
@@ -37,30 +37,30 @@ namespace Server
             // 지금은 간단하게 문자열을 byte 배열로 만들었는데
             // 실제 게임에서는 패킷이라는 정보를 만들어서 보냄
 
-            // TCP는 패킷이 잘려서 올 수 있다
-            Packet packet = new Packet() { size = 100, packetId = 10 };
+            //// TCP는 패킷이 잘려서 올 수 있다
+            //Packet packet = new Packet() { size = 100, packetId = 10 };
 
-            //byte[] sendBuffer = new byte[1024];
-            //byte[] buffer = BitConverter.GetBytes(knight.hp);
-            //byte[] buffer2 = BitConverter.GetBytes(knight.attack);
-            //Array.Copy(buffer, 0, sendBuffer, 0, buffer.Length);
-            //Array.Copy(buffer2, 0, sendBuffer, buffer.Length, buffer2.Length);
-
-            ArraySegment<byte> openSegment = SendBufferHelper.Open(4096);
-            byte[] buffer = BitConverter.GetBytes(packet.size);
-            byte[] buffer2 = BitConverter.GetBytes(packet.packetId);
-            Array.Copy(buffer, 0, openSegment.Array, openSegment.Offset, buffer.Length);
-            Array.Copy(buffer2, 0, openSegment.Array, openSegment.Offset + buffer.Length, buffer2.Length);
-            ArraySegment<byte> sendBuff = SendBufferHelper.Close(buffer.Length + buffer2.Length);
+            //ArraySegment<byte> openSegment = SendBufferHelper.Open(4096);
+            //byte[] buffer = BitConverter.GetBytes(packet.size);
+            //byte[] buffer2 = BitConverter.GetBytes(packet.packetId);
+            //Array.Copy(buffer, 0, openSegment.Array, openSegment.Offset, buffer.Length);
+            //Array.Copy(buffer2, 0, openSegment.Array, openSegment.Offset + buffer.Length, buffer2.Length);
+            //ArraySegment<byte> sendBuff = SendBufferHelper.Close(buffer.Length + buffer2.Length);
 
             // 100명의 유저가 움직인다면 Send를 하는 횟수가 빈번해짐
             // sendBuff는 세션 내부보다는 외부에서 만들어서 보내주는게 효율적이다
             //byte[] sendBuff = Encoding.UTF8.GetBytes("Welcome to MMORPG Server");
-            Send(sendBuff);
+            //Send(sendBuff);
 
-            Thread.Sleep(1000);
+            Thread.Sleep(5000);
 
             Disconnect();
+        }
+        public override void OnRecvPacket(ArraySegment<byte> buffer)
+        {
+            ushort size = BitConverter.ToUInt16(buffer.Array, buffer.Offset);
+            ushort id = BitConverter.ToUInt16(buffer.Array, buffer.Offset + 2);
+            Console.WriteLine($"RecvPacketId : {id}, Size : {size}");
         }
 
         public override void OnDisconnected(EndPoint endPoint)
@@ -68,13 +68,6 @@ namespace Server
             Console.WriteLine($"OnDisconnected : {endPoint}");
         }
 
-        public override int OnRecv(ArraySegment<byte> buffer)
-        {
-            string recvData = Encoding.UTF8.GetString(buffer.Array, buffer.Offset, buffer.Count);  // args.BytesTransferred : 몇 byte를 받았는지
-            Console.WriteLine($"[From Client] : {recvData}");
-            return buffer.Count;
-
-        }
 
         // 이후에는 문자열이 아니라 약속된 프로토콜 대로 데이터를 주고 받는다
         // 이동 패킷 (3,2) 좌표로 이동하고 싶다!

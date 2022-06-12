@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace ServerCore
 {
+    // [size(2)][packetId(2)][...][size(2)][packetId(2)][...] 
     public abstract class PacketSession : Session
     {
         public static readonly int HeaderSize = 2;
