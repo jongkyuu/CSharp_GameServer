@@ -44,13 +44,15 @@ namespace DummyClient
             //for (int i = 0; i < 5; i++)
             {
                 ArraySegment<byte> openSegment = SendBufferHelper.Open(4096);
-                byte[] size = BitConverter.GetBytes(packet.size);
-                byte[] packetId = BitConverter.GetBytes(packet.packetId);
-                byte[] playerId = BitConverter.GetBytes(packet.playerId);
 
-                Array.Copy(size, 0, openSegment.Array, openSegment.Offset, size.Length);
-                Array.Copy(packetId, 0, openSegment.Array, openSegment.Offset + size.Length, packetId.Length);
-                ArraySegment<byte> sendBuff = SendBufferHelper.Close(packet.size);
+                byte[] size = BitConverter.GetBytes(packet.size); // 2바이트
+                byte[] packetId = BitConverter.GetBytes(packet.packetId);  // 2바이트
+                byte[] playerId = BitConverter.GetBytes(packet.playerId);  // 8바이트
+
+                Array.Copy(size, 0, openSegment.Array, openSegment.Offset + 0, 2);
+                Array.Copy(packetId, 0, openSegment.Array, openSegment.Offset + 2, 2);
+                Array.Copy(playerId, 0, openSegment.Array, openSegment.Offset + 4, 8);
+                ArraySegment<byte> sendBuff = SendBufferHelper.Close(12);
 
                 Send(sendBuff);
             }
