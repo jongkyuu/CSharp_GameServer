@@ -49,10 +49,15 @@ namespace DummyClient
                 byte[] packetId = BitConverter.GetBytes(packet.packetId);  // 2바이트
                 byte[] playerId = BitConverter.GetBytes(packet.playerId);  // 8바이트
 
-                Array.Copy(size, 0, openSegment.Array, openSegment.Offset + 0, 2);
-                Array.Copy(packetId, 0, openSegment.Array, openSegment.Offset + 2, 2);
-                Array.Copy(playerId, 0, openSegment.Array, openSegment.Offset + 4, 8);
-                ArraySegment<byte> sendBuff = SendBufferHelper.Close(12);
+                ushort count = 0;
+
+                Array.Copy(size, 0, openSegment.Array, openSegment.Offset + count, 2);
+                count += 2;
+                Array.Copy(packetId, 0, openSegment.Array, openSegment.Offset + count, 2);
+                count += 2;
+                Array.Copy(playerId, 0, openSegment.Array, openSegment.Offset + count, 8);
+                count += 8;
+                ArraySegment<byte> sendBuff = SendBufferHelper.Close(count);
 
                 Send(sendBuff);
             }

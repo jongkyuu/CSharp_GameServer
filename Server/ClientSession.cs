@@ -64,9 +64,29 @@ namespace Server
         }
         public override void OnRecvPacket(ArraySegment<byte> buffer)
         {
+            ushort count = 0;
+
             ushort size = BitConverter.ToUInt16(buffer.Array, buffer.Offset);
-            ushort id = BitConverter.ToUInt16(buffer.Array, buffer.Offset + 2);
+            count += 2;
+            ushort id = BitConverter.ToUInt16(buffer.Array, buffer.Offset + count);
+            count += 2;
             Console.WriteLine($"RecvPacketId : {id}, Size : {size}");
+
+            switch ((PacketID)id)
+            {
+                case PacketID.PayerInfoReq:
+                    {
+                        long playerId = BitConverter.ToInt64(buffer.Array, buffer.Offset + count);
+                        count += 8;
+                        Console.WriteLine($"PayerInfoReq : {playerId}");
+                    }
+                    break;
+                case PacketID.PayerInfoOk:
+                    {
+
+                    }
+                    break;
+            }
         }
 
         public override void OnDisconnected(EndPoint endPoint)

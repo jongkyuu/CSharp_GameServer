@@ -29,8 +29,6 @@ namespace DummyClient
 
                 try
                 {
-
-
                 }
                 catch (Exception ex)
                 {
