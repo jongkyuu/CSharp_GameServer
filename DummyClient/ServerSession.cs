@@ -34,32 +34,44 @@ namespace DummyClient
 
     class ServerSession : Session
     {
+        // TryWriteBytes 대신 이렇게도 구현할 수 있음 
+        //static unsafe void ToBytes(byte[] array, int offset, ulong value)
+        //{
+        //    fixed (byte* ptr = &array[offset])
+        //        *(ulong*)ptr = value;
+        //}
+
         public override void OnConnected(EndPoint endPoint)
         {
             Console.WriteLine($"OnConnected : {endPoint}");
 
-            PlayerInfoReq packet = new PlayerInfoReq() { size = 4, packetId = (ushort)PacketID.PlayerInfoReq, playerId = 1001};
+            PlayerInfoReq packet = new PlayerInfoReq() { packetId = (ushort)PacketID.PlayerInfoReq, playerId = 1001};
 
             //// 보낸다
             //for (int i = 0; i < 5; i++)
             {
-                ArraySegment<byte> openSegment = SendBufferHelper.Open(4096);
-
-                byte[] size = BitConverter.GetBytes(packet.size); // 2바이트
-                byte[] packetId = BitConverter.GetBytes(packet.packetId);  // 2바이트
-                byte[] playerId = BitConverter.GetBytes(packet.playerId);  // 8바이트
+                ArraySegment<byte> s = SendBufferHelper.Open(4096);
 
                 ushort count = 0;
+                bool success = true;
 
-                Array.Copy(size, 0, openSegment.Array, openSegment.Offset + count, 2);
+                //success &= BitConverter.TryWriteBytes(new Span<byte>(s.Array, s.Offset, s.Count), packet.size);
                 count += 2;
-                Array.Copy(packetId, 0, openSegment.Array, openSegment.Offset + count, 2);
+                success &= BitConverter.TryWriteBytes(new Span<byte>(s.Array, s.Offset + count, s.Count - count), packet.packetId);
                 count += 2;
-                Array.Copy(playerId, 0, openSegment.Array, openSegment.Offset + count, 8);
+                success &= BitConverter.TryWriteBytes(new Span<byte>(s.Array, s.Offset + count, s.Count - count), packet.playerId);
                 count += 8;
+
+                success &= BitConverter.TryWriteBytes(new Span<byte>(s.Array, s.Offset, s.Count), count);
+
+                //byte[] size = BitConverter.GetBytes(packet.size); // 2바이트
+                //byte[] packetId = BitConverter.GetBytes(packet.packetId);  // 2바이트
+                //byte[] playerId = BitConverter.GetBytes(packet.playerId);  // 8바이트
+
                 ArraySegment<byte> sendBuff = SendBufferHelper.Close(count);
 
-                Send(sendBuff);
+                if(success)
+                    Send(sendBuff);
             }
         }
 

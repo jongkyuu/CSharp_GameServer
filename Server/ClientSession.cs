@@ -70,7 +70,7 @@ namespace Server
             count += 2;
             ushort id = BitConverter.ToUInt16(buffer.Array, buffer.Offset + count);
             count += 2;
-            Console.WriteLine($"RecvPacketId : {id}, Size : {size}");
+            
 
             switch ((PacketID)id)
             {
@@ -87,6 +87,8 @@ namespace Server
                     }
                     break;
             }
+
+            Console.WriteLine($"RecvPacketId : {id}, Size : {size}");
         }
 
         public override void OnDisconnected(EndPoint endPoint)
