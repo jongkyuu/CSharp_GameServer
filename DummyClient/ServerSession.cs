@@ -9,16 +9,8 @@ using ServerCore;
 
 namespace DummyClient
 {
-    public abstract class Packet
-    {
-        public ushort size;  // 네트워크단 PacketSession이 packet을 조립할때 참고하는 정보임. Packet 자체에서 size를 이용하는 부분은 없음
-        public ushort packetId; // TryWriteBytes 할때 (ushort)PacketID.PlayerInfoReq를 직접 넣어줘도 됨
-
-        public abstract ArraySegment<byte> Write();
-        public abstract void Read(ArraySegment<byte> s);
-    }
-
-    class PlayerInfoReq : Packet
+    // 자동화를 간략하게 하기 위해 Packet을 삭제함
+    class PlayerInfoReq
     {
         public long playerId;
         public string name;
@@ -55,12 +47,7 @@ namespace DummyClient
 
         public List<SkillInfo> skills = new List<SkillInfo>();   // 스킬 목록이 SkillInfo라는 구조체 형식으로 저장되어 있음
 
-        public PlayerInfoReq()
-        {
-            this.packetId = (ushort)PacketID.PlayerInfoReq;
-        }
-
-        public override void Read(ArraySegment<byte> segment)
+        public void Read(ArraySegment<byte> segment)
         {
             ushort count = 0;
 
@@ -89,7 +76,7 @@ namespace DummyClient
             }
         }
 
-        public override ArraySegment<byte> Write()
+        public ArraySegment<byte> Write()
         {
             ArraySegment<byte> segment = SendBufferHelper.Open(4096);
 
@@ -101,7 +88,7 @@ namespace DummyClient
 
             //success &= BitConverter.TryWriteBytes(new Span<byte>(s.Array, s.Offset, s.Count), packet.size);
             count += sizeof(ushort);
-            success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), this.packetId);   // packetId 대신 (ushort)PacketID.PlayerInfoReq 를 넣어줘도 됨
+            success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), (ushort)PacketID.PlayerInfoReq);   // packetId 대신 (ushort)PacketID.PlayerInfoReq 를 넣어줘도 됨
             count += sizeof(ushort); ;
             success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), this.playerId);
             count += sizeof(long);

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31229.75
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32616.157
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Server", "Server\Server.csproj", "{A7898750-5347-4A32-A977-B0F20D706DE5}"
 EndProject
@@ -17,9 +17,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LockDemo", "LockDemo\LockDe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeadLockDemo", "DeadLockDemo\DeadLockDemo.csproj", "{860F7FFA-640E-4539-8362-3903594A6899}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpinLockDemo", "SpinLockDemo\SpinLockDemo.csproj", "{B4493E99-5715-4411-883D-64364B3EFAE8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpinLockDemo", "SpinLockDemo\SpinLockDemo.csproj", "{B4493E99-5715-4411-883D-64364B3EFAE8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContextSwitchingDemo", "ContextSwitchingDemo\ContextSwitchingDemo.csproj", "{8C6471D8-4B50-46B9-A1D4-1BB0AF69183E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ContextSwitchingDemo", "ContextSwitchingDemo\ContextSwitchingDemo.csproj", "{8C6471D8-4B50-46B9-A1D4-1BB0AF69183E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PacketGenerator", "PacketGenerator\PacketGenerator.csproj", "{8AEB5FBF-D514-4DB0-8FEC-1024C4AA2259}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{1207F490-DB28-407F-991F-C90BB45BBA39}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Demo", "Demo", "{941D96B7-F1D8-497F-B16A-BE5437E32C1A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,9 +69,22 @@ Global
 		{8C6471D8-4B50-46B9-A1D4-1BB0AF69183E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8C6471D8-4B50-46B9-A1D4-1BB0AF69183E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8C6471D8-4B50-46B9-A1D4-1BB0AF69183E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8AEB5FBF-D514-4DB0-8FEC-1024C4AA2259}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8AEB5FBF-D514-4DB0-8FEC-1024C4AA2259}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8AEB5FBF-D514-4DB0-8FEC-1024C4AA2259}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8AEB5FBF-D514-4DB0-8FEC-1024C4AA2259}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{1082177F-3E81-4C06-A2F1-152338F726CE} = {941D96B7-F1D8-497F-B16A-BE5437E32C1A}
+		{36F79074-7EEE-44B5-ACE1-4A0BD0F927B1} = {941D96B7-F1D8-497F-B16A-BE5437E32C1A}
+		{94502DAD-9E0A-4967-BD57-9827071E0487} = {941D96B7-F1D8-497F-B16A-BE5437E32C1A}
+		{860F7FFA-640E-4539-8362-3903594A6899} = {941D96B7-F1D8-497F-B16A-BE5437E32C1A}
+		{B4493E99-5715-4411-883D-64364B3EFAE8} = {941D96B7-F1D8-497F-B16A-BE5437E32C1A}
+		{8C6471D8-4B50-46B9-A1D4-1BB0AF69183E} = {941D96B7-F1D8-497F-B16A-BE5437E32C1A}
+		{8AEB5FBF-D514-4DB0-8FEC-1024C4AA2259} = {1207F490-DB28-407F-991F-C90BB45BBA39}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C443B742-AB0B-4400-88EC-715A1A815FDF}
