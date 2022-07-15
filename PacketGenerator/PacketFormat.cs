@@ -12,8 +12,6 @@ namespace PacketGenerator
         // {1} 멤버 변수들
         // {2} 멤버 변수 Read
         // {3} 멤버 변수 Write
-
-
         public static string packetFormat =
 @"
 class {0}
@@ -26,8 +24,8 @@ class {0}
 
         ReadOnlySpan<byte> s = new ReadOnlySpan<byte>(segment.Array, segment.Offset, segment.Count);
 
-        count += sizeof(ushort);  
-        count += sizeof(ushort); 
+        count += sizeof(ushort);
+        count += sizeof(ushort);
         {2}
 
     }}
@@ -58,7 +56,33 @@ class {0}
         // {0} 변수 형식
         // {1} 변수 이름
         public static string memberFormat =
-@"public {0} {1}";
+@"public {0} {1};";
+
+        // {0} 리스트 이름 [대문자]
+        // {1} 리스트 이름 [소문자]
+        // {2} 멤버 변수들 
+        // {3} 멤버 변수 Read
+        // {4} 멤버 변수 Write
+        public static string memberListFormat =
+@"
+public struct {0}
+{{
+    {2}
+
+    public void Read(ReadOnlySpan<byte> s, ref ushort count)
+    {{
+        {3}
+    }}
+
+    public bool Write(Span<byte> s, ref ushort count)
+    {{
+        bool success = true;
+        {4}
+        return success;
+    }}
+}}
+
+public List<{0}> {1}s = new List<{0}>();";
 
         // {0} 변수 이름
         // {1} To~ 변수 형식
@@ -73,6 +97,22 @@ class {0}
 count += sizeof(ushort);
 this.{0} = Encoding.Unicode.GetString(s.Slice(count, {0}Len));
 count += {0}Len;";
+
+        // {0} 리스트 이름 [대문자]
+        // {1} 리스트 이름 [소문자]
+
+        public static string readListFormat =
+@"this.{1}s.Clear();
+ushort {1}Len = BitConverter.ToUInt16(s.Slice(count, s.Length - count));
+count += sizeof(ushort);
+
+for(int i = 0; i < {1}Len; i++)
+{{
+    {0} {1} = new {0}();
+    {1}.Read(s, ref count);
+    {1}s.Add({1});
+}}
+";
 
         // {0} 변수 이름
         // {1} 변수 형식
