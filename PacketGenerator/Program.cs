@@ -51,6 +51,9 @@ namespace PacketGenerator
                 packetName, t.Item1, t.Item2, t.Item3);
         }
 
+        // {1} 멤버 변수들
+        // {2} 멤버 변수 Read
+        // {3} 멤버 변수 Write
         private static Tuple<string, string, string> ParseMembers(XmlReader r)
         {
             string packetName = r["name"];
@@ -74,9 +77,9 @@ namespace PacketGenerator
 
                 if (string.IsNullOrEmpty(memberCode) == false)
                     memberCode += Environment.NewLine;
-                if (string.IsNullOrEmpty(memberCode) == false)
+                if (string.IsNullOrEmpty(readCode) == false)
                     readCode += Environment.NewLine;
-                if (string.IsNullOrEmpty(memberCode) == false)
+                if (string.IsNullOrEmpty(writeCode) == false)
                     writeCode += Environment.NewLine;
 
                 string memberType  = r.Name.ToLower();
@@ -97,10 +100,13 @@ namespace PacketGenerator
                     case "string":
                         memberCode += string.Format(PacketFormat.memberFormat, memberType, memberName);
                         readCode += string.Format(PacketFormat.readStringFormat, memberName);
-                        writeCode += string.Format(PacketFormat.writeStringFormat, memberName);
+                        writeCode += string.Format(PacketFormat.writeStringFormat, memberName); 
                         break;
                     case "list":
-                        ParseList(r);
+                        Tuple<string, string, string> t = ParseList(r);
+                        memberCode += t.Item1;
+                        readCode += t.Item2;
+                        writeCode += t.Item3;
                         break;
                     default:
                         break;
@@ -131,6 +137,17 @@ namespace PacketGenerator
                 t.Item1,
                 t.Item2,
                 t.Item3);
+
+            string readCode = string.Format(PacketFormat.readListFormat,
+                      FirstCharToUpper(listName),
+                      FirstCharToLower(listName));
+
+            string writeCode = string.Format(PacketFormat.writeListFormat,
+                      FirstCharToUpper(listName),
+                      FirstCharToLower(listName));
+
+            return new Tuple<string, string, string>(memberCode, readCode, writeCode);
+
         }
 
         public static string ToMemberType(string memberType)

@@ -37,7 +37,6 @@ class {0}
         bool success = true;
 
         Span<byte> s = new Span<byte>(segment.Array, segment.Offset, segment.Count);
-        new Span<byte>();
 
         count += sizeof(ushort);
         success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), (ushort)PacketID.{0}); 
@@ -89,7 +88,7 @@ public List<{0}> {1}s = new List<{0}>();";
         // {2} 변수 형식
         public static string readFormat =
 @"this.{0} = BitConverter.{1}(s.Slice(count, s.Length - count));
-                count += sizeof({2});";
+count += sizeof({2});";
 
         // {0} 변수 이름
         public static string readStringFormat =
@@ -100,7 +99,6 @@ count += {0}Len;";
 
         // {0} 리스트 이름 [대문자]
         // {1} 리스트 이름 [소문자]
-
         public static string readListFormat =
 @"this.{1}s.Clear();
 ushort {1}Len = BitConverter.ToUInt16(s.Slice(count, s.Length - count));
@@ -125,6 +123,15 @@ count += sizeof({1});";
 @"ushort {0}Len = (ushort)Encoding.Unicode.GetByteCount(this.{0});
 success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), {0}Len);
 count += sizeof(ushort);
+Array.Copy(Encoding.Unicode.GetBytes(this.{0}), 0, segment.Array, count, {0}Len);
 count += {0}Len;";
+
+        // {0} 리스트 이름 [대문자]
+        // {1} 리스트 이름 [소문자]
+        public static string writeListFormat =
+@"success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), (ushort)this.{1}s.Count);   // Count는 int이므로 그대로 넣으면 4바이트가 들어감. ushort로 캐스팅해서 2바이트만 넣어줌
+count += sizeof(ushort);
+foreach({0} {1} in {1}s)
+    success &= {1}.Write(s, ref count);";
     }
 }
