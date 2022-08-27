@@ -5,19 +5,23 @@ namespace PacketGenerator
 {
     public class Program
     {
-        private static string genPackets;
+        private static string   genPackets;
 
         static ushort packetId;
         static string packetEnums;
         static void Main(string[] args)
         {
+            string pdlPath = "PDL.xml";
             XmlReaderSettings settings = new XmlReaderSettings()
             {
                 IgnoreComments = true,
                 IgnoreWhitespace = true
             };
 
-            using (XmlReader r = XmlReader.Create("PDL.xml", settings))  // using 범위 벗어나면 알아서 Dispose
+            if(args.Length > 0)
+                pdlPath = args[0];
+
+            using (XmlReader r = XmlReader.Create(pdlPath, settings))  // using 범위 벗어나면 알아서 Dispose
             {
                 r.MoveToContent();
                 while (r.Read())
