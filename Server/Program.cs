@@ -18,6 +18,7 @@ namespace Server
         {
             // DNS (Domain Name System)
             // www.google.com -> 123.123.123.1
+            PacketManager.Instance.Register(); // single Thread일때 Register 실행
 
             // IP 주소 생성
             string host = Dns.GetHostName();
