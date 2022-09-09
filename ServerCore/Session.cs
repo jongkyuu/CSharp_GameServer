@@ -63,6 +63,15 @@ namespace ServerCore
         public abstract void OnSend(int numOfBytes);
         public abstract void OnDisconnected(EndPoint endPoint);
 
+        void Clear()
+        {
+            lock (_lock)
+            {
+                _sendQueue.Clear();
+                _pendingList.Clear();
+            }
+        }
+
         public void Start(Socket socket)
         {
             _socket = socket;
@@ -93,10 +102,14 @@ namespace ServerCore
             OnDisconnected(_socket.RemoteEndPoint);
             _socket.Shutdown(SocketShutdown.Both);
             _socket.Close();
+            Clear();
         }
 
         void RegisterSend()
         {
+            if (_disconnected == 1)
+                return;
+
             // 아래 코드는 _sendQueue에 있는 내용을 한꺼번에 보내고 비움 
             // 짧은 시간동안 몇 byte를 보냈는지 추적해서 너무 많이 보낸다면 좀 쉬면서 보내줘야할 필요가 있다
             // 동시에 패킷이 몰릴때 상대가 받을 수 없는데 계속 보내는건 문제가 있음 
@@ -111,10 +124,17 @@ namespace ServerCore
 
             _sendArgs.BufferList = _pendingList;
 
-            bool pending = _socket.SendAsync(_sendArgs);  // 운영체제가 커널단에서 처리하기 때문에 아무렇게나 호출하면 안됨
-            if (pending == false)
-                OnSendCompleted(null, _sendArgs);
-        }
+            try
+            {
+                bool pending = _socket.SendAsync(_sendArgs);  // 운영체제가 커널단에서 처리하기 때문에 아무렇게나 호출하면 안됨
+                if (pending == false)
+                    OnSendCompleted(null, _sendArgs);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"RegisterSned Failed {e}");
+            }
+        }            
 
         private void OnSendCompleted(object sender, SocketAsyncEventArgs args)
         {
@@ -199,7 +219,7 @@ namespace ServerCore
             }
             else
             {
-                // TODO Disconnect
+                // TODO : Disconnect
                 Disconnect();
             }
         }
