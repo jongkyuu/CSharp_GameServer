@@ -22,7 +22,11 @@ namespace PacketGenerator
             };
 
             if(args.Length > 0)
+            {
                 pdlPath = args[0];
+                Console.WriteLine($"PDL Path : {pdlPath}");
+            }
+                
 
             using (XmlReader r = XmlReader.Create(pdlPath, settings))  // using 범위 벗어나면 알아서 Dispose
             {
@@ -41,6 +45,7 @@ namespace PacketGenerator
                 File.WriteAllText("ClientPacketManager.cs", clientManagerText);
                 string serverManagerText = string.Format(PacketFormat.managerFormat, serverManagerRegister);
                 File.WriteAllText("ServerPacketManager.cs", serverManagerText);
+                Console.WriteLine("Packet Generator Finished");
             }
         }
 

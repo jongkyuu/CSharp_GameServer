@@ -92,7 +92,7 @@ namespace ServerCore
                 if (_pendingList.Count == 0)
                     RegisterSend();
             }
-        }
+        } 
 
         public void Disconnect()
         {
