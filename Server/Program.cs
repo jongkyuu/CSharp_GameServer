@@ -1,18 +1,14 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using ServerCore;
+using System;
 using System.Net;
-using System.Net.Sockets;
-using System.Text;
-using ServerCore;
-using System.Collections.Generic;
 
 namespace Server
 {
- 
+
     class Program
     {
         static Listener _listener = new Listener();
+        public static GameRoom Room = new GameRoom();
 
         static void Main(string[] args)
         {
@@ -27,7 +23,7 @@ namespace Server
             IPEndPoint endPoint = new IPEndPoint(ipAddress, 7777);
 
             // 문지기(가 들고있는 휴대폰) 생성
-            _listener.Init(endPoint, () => { return new ClientSession(); });
+            _listener.Init(endPoint, () => { return SessionManager.Instacne.Generate(); });
             Console.WriteLine("Listening...");
 
             while (true)

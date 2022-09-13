@@ -9,11 +9,17 @@ using ServerCore;
 
 namespace Server
 {
-	class ClientSession : PacketSession
+    class ClientSession : PacketSession
     {
+        public int SessionId { get; set; }
+        public GameRoom Room { get; set; }
+
         public override void OnConnected(EndPoint endPoint)
         {
             Console.WriteLine($"OnConnected : {endPoint}");
+            Program.Room.Enter(this);
+
+            #region Comment
 
             // 보내는 순간에 외부에서 bytes를 만들어 줬다
             // 지금은 간단하게 문자열을 byte 배열로 만들었는데
@@ -34,18 +40,26 @@ namespace Server
             //byte[] sendBuff = Encoding.UTF8.GetBytes("Welcome to MMORPG Server");
             //Send(sendBuff);
 
+            #endregion
+
             Thread.Sleep(5000);
             Disconnect();
         }
         public override void OnRecvPacket(ArraySegment<byte> buffer)
         {
             PacketManager.Instance.OnRecvPacket(this, buffer);
-
-            
         }
 
         public override void OnDisconnected(EndPoint endPoint)
         {
+            SessionManager.Instacne.Remove(this);
+
+            if(Room != null)
+            {
+                Room.Leave(this);
+                Room = null;
+            }
+
             Console.WriteLine($"OnDisconnected : {endPoint}");
         }
 
