@@ -1,4 +1,5 @@
-﻿using ServerCore;
+﻿using Server;
+using ServerCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,18 +9,14 @@ using System.Threading.Tasks;
 
 class PacketHandler
 {
-    public static void C_PlayerInfoReqHandler(PacketSession session, IPacket packet)
+    public static void C_ChatHandler(PacketSession session, IPacket packet)
     {
-        C_PlayerInfoReq p = packet as C_PlayerInfoReq;
-        Console.WriteLine($"PlayerInfoReq : {p.playerId} {p.name}");
+        C_Chat chatPacket = packet as C_Chat;
+        ClientSession clientSession = session as ClientSession;
 
-        foreach (C_PlayerInfoReq.Skill skill in p.skills)
-        {
-            Console.WriteLine($"Skill({skill.id})({skill.level})({skill.duration})");
-        }
-    }
-    public static void TestHandler(PacketSession session, IPacket packet)
-    {
-        // PDL에 packet을 추가하면 PacketHandler에 해당 Handler 함수를 추가해 줘야한다
+        if (clientSession.Room == null)
+            return;
+
+        clientSession.Room.Broadcast(clientSession, chatPacket.chat);
     }
 }
