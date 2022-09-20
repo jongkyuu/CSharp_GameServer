@@ -30,13 +30,15 @@ namespace DummyClient
 
                 try
                 {
+                    // 모든 세션들이 서버쪽으로 채팅 메세지를 날려줌
+                    SessionManager.Instacne.SendForEach();
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.ToString());
                 }
 
-                Thread.Sleep(1000);
+                Thread.Sleep(250); // 일반적으로 MMO에서 이동 패킷을 1초에 4번정도 보냄.
             }
 
         }

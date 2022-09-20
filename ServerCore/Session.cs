@@ -41,8 +41,8 @@ namespace ServerCore
 
         public abstract void OnRecvPacket(ArraySegment<byte> buffer);
 
-
     }
+
     public abstract class Session
     {
         Socket _socket;

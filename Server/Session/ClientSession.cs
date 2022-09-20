@@ -42,8 +42,8 @@ namespace Server
 
             #endregion
 
-            Thread.Sleep(5000);
-            Disconnect();
+            //Thread.Sleep(5000);
+            //Disconnect();
         }
         public override void OnRecvPacket(ArraySegment<byte> buffer)
         {
