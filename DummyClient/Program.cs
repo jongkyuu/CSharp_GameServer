@@ -25,6 +25,10 @@ namespace DummyClient
             connector.Connect(endPoint, () => { return SessionManager.Instacne.Generate(); },
                 10);
 
+            //Thread.Sleep(250);
+
+            bool _isInit = true;
+
             while (true)
             {
 

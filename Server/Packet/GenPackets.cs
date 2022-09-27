@@ -95,19 +95,33 @@ class S_Chat : IPacket
         ushort count = 0;
         bool success = true;
 
+  //      Span<byte> s = new Span<byte>(segment.Array, segment.Offset, segment.Count);
+
+  //      count += sizeof(ushort);
+  //      success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), (ushort)PacketID.S_Chat); 
+  //      count += sizeof(ushort);
+  //      success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), this.playerId);
+		//count += sizeof(int);
+		//ushort chatLen = (ushort)Encoding.Unicode.GetByteCount(this.chat);
+		//success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), chatLen);
+		//count += sizeof(ushort);
+		//Array.Copy(Encoding.Unicode.GetBytes(this.chat), 0, segment.Array, count, chatLen);
+		//count += chatLen;
+  //      success &= BitConverter.TryWriteBytes(s, count);
+
+
         Span<byte> s = new Span<byte>(segment.Array, segment.Offset, segment.Count);
 
         count += sizeof(ushort);
-        success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), (ushort)PacketID.S_Chat); 
+        success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), (ushort)PacketID.S_Chat);
         count += sizeof(ushort);
         success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), this.playerId);
-		count += sizeof(int);
-		ushort chatLen = (ushort)Encoding.Unicode.GetByteCount(this.chat);
-		success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), chatLen);
-		count += sizeof(ushort);
-		Array.Copy(Encoding.Unicode.GetBytes(this.chat), 0, segment.Array, count, chatLen);
-		count += chatLen;
-        success &= BitConverter.TryWriteBytes(s, count);  
+        count += sizeof(int);
+        ushort chatLen = (ushort)Encoding.Unicode.GetBytes(this.chat, 0, this.chat.Length, segment.Array, segment.Offset + count + sizeof(ushort));
+        success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), chatLen);
+        count += sizeof(ushort);
+        count += chatLen;
+        success &= BitConverter.TryWriteBytes(s, count);
 
         if (success == false)
             return null;

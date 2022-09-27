@@ -48,15 +48,24 @@ class C_Chat : IPacket
 
         Span<byte> s = new Span<byte>(segment.Array, segment.Offset, segment.Count);
 
+  //      count += sizeof(ushort);
+  //      success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), (ushort)PacketID.C_Chat); 
+  //      count += sizeof(ushort);
+  //      ushort chatLen = (ushort)Encoding.Unicode.GetByteCount(this.chat);
+		//success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), chatLen);
+		//count += sizeof(ushort);
+		//Array.Copy(Encoding.Unicode.GetBytes(this.chat), 0, segment.Array, count, chatLen);
+		//count += chatLen;
+  //      success &= BitConverter.TryWriteBytes(s, count);
+
         count += sizeof(ushort);
-        success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), (ushort)PacketID.C_Chat); 
+        success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), (ushort)PacketID.C_Chat);
         count += sizeof(ushort);
-        ushort chatLen = (ushort)Encoding.Unicode.GetByteCount(this.chat);
-		success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), chatLen);
-		count += sizeof(ushort);
-		Array.Copy(Encoding.Unicode.GetBytes(this.chat), 0, segment.Array, count, chatLen);
-		count += chatLen;
-        success &= BitConverter.TryWriteBytes(s, count);  
+        ushort chatLen = (ushort)Encoding.Unicode.GetBytes(this.chat, 0, this.chat.Length, segment.Array, segment.Offset + count + sizeof(ushort));
+        success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), chatLen);
+        count += sizeof(ushort);
+        count += chatLen;
+        success &= BitConverter.TryWriteBytes(s, count);
 
         if (success == false)
             return null;
