@@ -17,7 +17,8 @@ namespace Server
         public override void OnConnected(EndPoint endPoint)
         {
             Console.WriteLine($"OnConnected : {endPoint}");
-            Program.Room.Enter(this);
+
+            Program.Room.Push(() => Program.Room.Enter(this));
 
             #region Comment
 
@@ -56,7 +57,8 @@ namespace Server
 
             if(Room != null)
             {
-                Room.Leave(this);
+                GameRoom room = Room;
+                room.Push(() => room.Leave(this));
                 Room = null;
             }
 
